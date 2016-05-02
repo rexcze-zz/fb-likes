@@ -4,6 +4,9 @@ require_relative 'config/facebook'
 class Scraper
   include Capybara::DSL
 
+  class PageDoesNotExist < StandardError; end
+  class NoLikesFound < StandardError; end
+
   FB_SITE = 'https://www.facebook.com/'
   SELECTOR = 'div.fsl.fwb.fcb a'
 
@@ -14,8 +17,8 @@ class Scraper
   def get_data(user_id)
     @session.visit "#{FB_SITE}profile.php?id=#{user_id}&sk=likes"
 
-    return ['ERROR: Page not found'] if @session.has_css?('div#error')
-    return ['ERROR: Cannot load page'] unless @session.current_url.include?('sk=likes')
+    raise PageDoesNotExist if @session.has_css?('div#error')
+    raise NoLikesFound unless @session.current_url.include?('sk=likes')
 
     load_all_elems
     @session.all(SELECTOR).map { |link| link[:href] }

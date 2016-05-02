@@ -22,7 +22,14 @@ class Worker
 
     scraper = Scraper.new
     scraper.login
-    data = scraper.get_data(user_id)
+
+    begin
+      data = scraper.get_data(user_id)
+    rescue Scraper::PageDoesNotExist, Scraper::NoLikesFound
+      logger.error "#{user_id}: Likes could not be retrieved"
+      return
+    end
+
     redis.hset(Config::Redis.key, user_id, MultiJson.dump(data))
   end
 end
