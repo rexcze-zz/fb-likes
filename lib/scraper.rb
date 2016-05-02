@@ -7,6 +7,7 @@ class Scraper
   class PageDoesNotExist < StandardError; end
   class NoLikesFound < StandardError; end
 
+  MAX_LIKES = 400
   FB_SITE = 'https://www.facebook.com/'
   SELECTOR = 'div.fsl.fwb.fcb a'
 
@@ -38,6 +39,8 @@ class Scraper
       current_elems_count = elems_count
       scroll_page
       wait_for_ajax(current_elems_count)
+
+      break if elems_count >= MAX_LIKES
 
       # No new content
       if current_elems_count == elems_count
