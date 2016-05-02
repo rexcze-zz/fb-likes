@@ -25,7 +25,7 @@ class Worker
 
     begin
       data = scraper.get_data(user_id)
-    rescue Scraper::PageDoesNotExist, Scraper::NoLikesFound
+    rescue Scraper::PageDoesNotExist
       logger.error "#{user_id}: Likes could not be retrieved"
       return
     end

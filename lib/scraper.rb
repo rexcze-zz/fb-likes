@@ -5,7 +5,6 @@ class Scraper
   include Capybara::DSL
 
   class PageDoesNotExist < StandardError; end
-  class NoLikesFound < StandardError; end
 
   MAX_LIKES = 400
   FB_SITE = 'https://www.facebook.com/'
@@ -16,10 +15,10 @@ class Scraper
   end
 
   def get_data(user_id)
-    @session.visit "#{FB_SITE}profile.php?id=#{user_id}&sk=likes"
+    @session.visit "#{FB_SITE}app_scoped_user_id/#{user_id}/"
+    @session.visit "#{@session.current_url}/likes"
 
     raise PageDoesNotExist if @session.has_css?('div#error')
-    raise NoLikesFound unless @session.current_url.include?('sk=likes')
 
     load_all_elems
     @session.all(SELECTOR).map { |link| link[:href] }
