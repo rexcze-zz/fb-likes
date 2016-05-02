@@ -1,0 +1,7 @@
+#!/usr/bin/env ruby
+
+concurrency = '1'
+queue = 'likes'
+file = File.expand_path('../lib/worker.rb', __dir__)
+
+exec("bundle exec sidekiq -c #{concurrency} -q #{queue} -r #{file}")

@@ -1,0 +1,10 @@
+source 'https://rubygems.org'
+
+gem 'sidekiq'
+gem 'redis'
+gem 'hiredis'
+gem 'multi_json'
+gem 'capybara'
+gem 'capybara-webkit'
+gem 'sinatra'
+gem 'dotenv'

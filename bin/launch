@@ -1,0 +1,25 @@
+#!/usr/bin/env ruby
+
+require_relative '../lib/worker'
+require_relative '../lib/config/redis'
+require 'sidekiq/api'
+
+begin
+  user_ids = File.readlines(ARGV[0]).uniq
+rescue
+  puts 'Error: Input file does not exist'
+  exit
+end
+
+puts "Users count: #{user_ids.size}"
+
+# Delete existing data
+Config::Redis.connection.del(Config::Redis.key)
+
+# Reset Sidekiq stats
+Sidekiq::Stats.new.reset('failed', 'processed')
+
+# Schedule jobs
+user_ids.each do |user_id|
+  Worker.perform_async(user_id.strip)
+end

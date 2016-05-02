@@ -1,0 +1,21 @@
+#!/usr/bin/env ruby
+
+require 'multi_json'
+require_relative '../lib/config/redis'
+
+data = Config::Redis.connection.hgetall(Config::Redis.key)
+
+puts 'Exporting data'
+puts "Number of records: #{data.keys.size}"
+
+rows = []
+
+data.each do |user_id, val|
+  likes = MultiJson.load(val)
+  likes.each { |like| rows << [user_id, like.force_encoding(Encoding::UTF_8)] }
+end
+
+output = File.open('likes.tsv', 'w')
+output.puts ['user_id', 'value'].join("\t")
+rows.each { |row| output.puts row.join("\t") }
+output.close
