@@ -12,8 +12,12 @@ module Config
         @conn ||= ::Redis.new(url: url, driver: :hiredis)
       end
 
-      def key
-        @key ||= 'likes'
+      def key_likes
+        @key_likes ||= 'likes'
+      end
+
+      def key_groups
+        @key_groups ||= 'groups'
       end
     end
   end

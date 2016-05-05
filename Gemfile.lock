@@ -48,6 +48,7 @@ PLATFORMS
 DEPENDENCIES
   capybara
   capybara-webkit
+  choice
   dotenv
   hiredis
   multi_json

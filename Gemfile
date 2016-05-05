@@ -1,5 +1,6 @@
 source 'https://rubygems.org'
 
+gem 'choice'
 gem 'sidekiq'
 gem 'redis'
 gem 'hiredis'

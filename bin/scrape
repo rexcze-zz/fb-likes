@@ -1,0 +1,52 @@
+#!/usr/bin/env ruby
+
+require 'sidekiq'
+require 'sidekiq/api'
+require 'choice'
+
+require_relative '../lib/config/app'
+require_relative '../lib/config/redis'
+require_relative '../lib/jobs/scrape'
+
+Choice.options do
+  option :input, required: true do
+    short '-i'
+    long '--input=FILE'
+    desc 'required: file with list of user IDs'
+  end
+
+  option :type, required: true do
+    short '-t'
+    long '--type=TYPE'
+    desc "required: type of data to scrape (#{Config::App.supported_types})"
+    valid Config::App::SUPPORTED_TYPES
+  end
+
+  option :help do
+    long '--help'
+    desc 'show help'
+  end
+end
+
+# File does not exist
+begin
+  user_ids = File.readlines(Choice[:input]).uniq
+rescue
+  puts 'Error: Input file does not exist'
+  exit
+end
+
+type = Choice[:type]
+puts "Scraping #{type}"
+puts "User IDs count: #{user_ids.size}"
+
+# Delete existing data
+Config::Redis.connection.del(Config::Redis.method("key_#{type}").call)
+
+# Reset Sidekiq stats
+Sidekiq::Stats.new.reset('failed', 'processed')
+
+# Schedule jobs
+user_ids.each do |user_id|
+  Scrape.perform_async(user_id.strip, type)
+end

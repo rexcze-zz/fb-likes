@@ -1,21 +1,35 @@
 #!/usr/bin/env ruby
 
 require 'multi_json'
+
+require_relative '../lib/config/app'
 require_relative '../lib/config/redis'
 
-data = Config::Redis.connection.hgetall(Config::Redis.key)
+type = ARGV[0]
 
-puts 'Exporting data'
+if type.nil? || type.empty?
+  puts 'Error: No export type given'
+  exit
+end
+
+unless Config::App.supported_type?(type)
+  puts 'Error: Given data type is not supported'
+  exit
+end
+
+data = Config::Redis.connection.hgetall(Config::Redis.method("key_#{type}").call)
+
+puts "Exporting #{type}"
 puts "Number of records: #{data.keys.size}"
 
 rows = []
 
-data.each do |user_id, val|
-  likes = MultiJson.load(val)
-  likes.each { |like| rows << [user_id, like.force_encoding(Encoding::UTF_8)] }
+data.each do |user_id, json|
+  values = MultiJson.load(json)
+  values.each { |val| rows << [user_id, val.force_encoding(Encoding::UTF_8)] }
 end
 
-output = File.open('likes.tsv', 'w')
+output = File.open("#{type}.tsv", 'w')
 output.puts ['user_id', 'value'].join("\t")
 rows.each { |row| output.puts row.join("\t") }
 output.close

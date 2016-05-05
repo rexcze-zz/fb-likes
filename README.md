@@ -1,5 +1,5 @@
-# FB likes
-Get lists of pages that users with given IDs like on Facebook.
+# FB data
+Get lists of pages that users with given IDs like or groups that they are members of.
 
 ## Installation
 ```
@@ -26,7 +26,14 @@ The web inteface is by default available at URL: http://localhost:9292
 
 ### Get data
 ```
-bin/launch [input file]
+bin/scrape -i [input file] -t [data type: likes | groups]
+bin/scrape -i [input file] -t likes
+bin/scrape -i [input file] -t groups
+```
+
+To show help information run:
+```
+bin/scrape --help
 ```
 
 The input file should contain list of user IDs with each user ID placed on separate line.
@@ -39,13 +46,15 @@ The input file should contain list of user IDs with each user ID placed on separ
 
 To get user ID you can use http://findmyfbid.com/
 
-Retrieved data are stored into Redis and are overwritten each time the script is run. Export the data first, before you start the script again.
+Retrieved data are stored into Redis and are overwritten each time the script is run with the same type parameter. Export the data first, before you start the script again.
 
 ### Export data to TSV
 ```
-bin/export
+bin/export [data type: likes | groups]
+bin/export likes
+bin/export groups
 ```
 
-Data will be saved into file **likes.tsv**
+Data will be saved into file **likes.tsv** or **groups.tsv** according to the required data type.
 
 You can export the data as many times as you want, but if you run the script to get data the data will be overwritten.

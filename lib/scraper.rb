@@ -6,22 +6,11 @@ class Scraper
 
   class PageDoesNotExist < StandardError; end
 
-  MAX_LIKES = 400
-  FB_SITE = 'https://www.facebook.com/'
-  SELECTOR = 'div.fsl.fwb.fcb a'
+  FB_SITE = 'https://www.facebook.com'
+  MAX_ELEMS = 400
 
   def initialize
     @session = Capybara::Session.new(:webkit)
-  end
-
-  def get_data(user_id)
-    @session.visit "#{FB_SITE}app_scoped_user_id/#{user_id}/"
-    @session.visit "#{@session.current_url}/likes"
-
-    raise PageDoesNotExist if @session.has_css?('div#error')
-
-    load_all_elems
-    @session.all(SELECTOR).map { |link| link[:href] }
   end
 
   def login
@@ -31,7 +20,38 @@ class Scraper
     @session.find('input[type=submit]').click
   end
 
+  def get_likes(user_id)
+    @selector = 'div.fsl.fwb.fcb a'
+    visit_page_with_data(user_id, 'likes')
+    load_all_elems
+    @session.all(@selector).map { |link| link[:href] }
+  end
+
+  def get_groups(user_id)
+    @selector = 'div.mbs.fwb a'
+    visit_page_with_data(user_id, 'groups')
+    load_all_elems
+    @session.all(@selector).map { |link| "#{FB_SITE}#{link[:href]}" }
+  end
+
   private
+
+  def visit_page_with_data(user_id, type)
+    @session.visit "#{FB_SITE}/app_scoped_user_id/#{user_id}/"
+    @session.visit page_with_data_url(user_id, type)
+
+    if @session.status_code == 404 || @session.has_css?('div#error')
+      raise PageDoesNotExist, 'Data not available'
+    end
+  end
+
+  def page_with_data_url(user_id, type)
+    if @session.current_url.include?('profile.php')
+      "#{@session.current_url}&sk=#{type}"
+    else
+      "#{@session.current_url}/#{type}"
+    end
+  end
 
   def load_all_elems
     loop do
@@ -39,7 +59,7 @@ class Scraper
       scroll_page
       wait_for_ajax(current_elems_count)
 
-      break if elems_count >= MAX_LIKES
+      break if elems_count >= MAX_ELEMS
 
       # No new content
       if current_elems_count == elems_count
@@ -65,7 +85,7 @@ class Scraper
   end
 
   def elems_count
-    @session.all(SELECTOR).count
+    @session.all(@selector).count
   end
 
   def scroll_page
