@@ -45,6 +45,7 @@ Config::Redis.connection.del(Config::Redis.method("key_#{type}").call)
 
 # Reset Sidekiq stats
 Sidekiq::Stats.new.reset('failed', 'processed')
+Sidekiq::DeadSet.new.clear
 
 # Schedule jobs
 user_ids.each do |user_id|
