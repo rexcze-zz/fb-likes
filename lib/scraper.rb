@@ -55,32 +55,10 @@ class Scraper
 
   def load_all_elems(limited)
     loop do
-      current_elems_count = elems_count
       scroll_page
-      wait_for_ajax(current_elems_count)
-
+      sleep 1
       break if limited && elems_count >= MAX_ELEMS
-
-      # No new content
-      if current_elems_count == elems_count
-        # Try for the last time
-        scroll_page
-        wait_for_ajax(current_elems_count)
-        break if current_elems_count == elems_count
-      end
-    end
-  end
-
-  def wait_for_ajax(current_elems_count)
-    wait_time = 0
-    interval = 0.1
-
-    loop do
-      sleep interval
-      wait_time += interval
-
-      break if current_elems_count != elems_count
-      break if wait_time >= 10
+      break if all_elems_loaded?
     end
   end
 
@@ -90,5 +68,9 @@ class Scraper
 
   def scroll_page
     @session.execute_script 'window.scrollBy(0,10000)'
+  end
+
+  def all_elems_loaded?
+    @session.all('div.uiHeader').count > 0
   end
 end
