@@ -10,7 +10,7 @@ class Scrape
 
   sidekiq_options retry: 5, queue: :scraping, backtrace: false
 
-  def perform(user_id, type)
+  def perform(user_id, type, limited)
     redis = Config::Redis.connection
     key = Config::Redis.method("key_#{type}").call
 
@@ -21,7 +21,7 @@ class Scrape
     scraper.login
 
     begin
-      data = scraper.method("get_#{type}").call(user_id)
+      data = scraper.method("get_#{type}").call(user_id, limited)
     rescue Scraper::PageDoesNotExist => e
       logger.error e.message
       return

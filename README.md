@@ -44,6 +44,11 @@ The input file should contain list of user IDs with each user ID placed on separ
 ...
 ```
 
+By default the number of scraped records on 1 page is limited. If you want to scrape all data, use **--no-limit** parameter.
+```
+bin/scrape -i [input file] -t likes --nolimit
+```
+
 To get user ID you can use http://findmyfbid.com/
 
 Retrieved data are stored into Redis and are overwritten each time the script is run with the same type parameter. Export the data first, before you start the script again.

@@ -22,6 +22,11 @@ Choice.options do
     valid Config::App::SUPPORTED_TYPES
   end
 
+  option :nolimit do
+    long '--nolimit'
+    desc 'scrape all data'
+  end
+
   option :help do
     long '--help'
     desc 'show help'
@@ -48,6 +53,7 @@ Sidekiq::Stats.new.reset('failed', 'processed')
 Sidekiq::DeadSet.new.clear
 
 # Schedule jobs
+limited = Choice[:nolimit].nil?
 user_ids.each do |user_id|
-  Scrape.perform_async(user_id.strip, type)
+  Scrape.perform_async(user_id.strip, type, limited)
 end

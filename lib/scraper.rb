@@ -20,17 +20,17 @@ class Scraper
     @session.find('input[type=submit]').click
   end
 
-  def get_likes(user_id)
+  def get_likes(user_id, limited)
     @selector = 'div.fsl.fwb.fcb a'
     visit_page_with_data(user_id, 'likes')
-    load_all_elems
+    load_all_elems(limited)
     @session.all(@selector).map { |link| link[:href] }
   end
 
-  def get_groups(user_id)
+  def get_groups(user_id, limited)
     @selector = 'div.mbs.fwb a'
     visit_page_with_data(user_id, 'groups')
-    load_all_elems
+    load_all_elems(limited)
     @session.all(@selector).map { |link| "#{FB_SITE}#{link[:href]}" }
   end
 
@@ -53,13 +53,13 @@ class Scraper
     end
   end
 
-  def load_all_elems
+  def load_all_elems(limited)
     loop do
       current_elems_count = elems_count
       scroll_page
       wait_for_ajax(current_elems_count)
 
-      break if elems_count >= MAX_ELEMS
+      break if limited && elems_count >= MAX_ELEMS
 
       # No new content
       if current_elems_count == elems_count
