@@ -17,14 +17,15 @@ class Scrape
     # Data already scraped
     return if redis.hexists(key, user_id)
 
-    scraper = Scraper.new
-    scraper.login
-
     begin
+      scraper = Scraper.new
+      scraper.login
       data = scraper.method("get_#{type}").call(user_id, limited)
     rescue Scraper::PageDoesNotExist => e
       logger.error e.message
       return
+    ensure
+      scraper.close_session
     end
 
     redis.hset(key, user_id, MultiJson.dump(data))

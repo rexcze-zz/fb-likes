@@ -34,6 +34,12 @@ class Scraper
     @session.all(@selector).map { |link| "#{FB_SITE}#{link[:href]}" }
   end
 
+  def close_session
+    driver = @session.driver
+    conn = driver.instance_variable_get('@browser').instance_variable_get('@connection')
+    Process.kill('TERM', conn.pid)
+  end
+
   private
 
   def visit_page_with_data(user_id, type)
