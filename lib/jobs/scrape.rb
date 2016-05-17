@@ -13,9 +13,13 @@ class Scrape
   def perform(user_id, type, limited)
     redis = Config::Redis.connection
     key = Config::Redis.method("key_#{type}").call
+    logger.info "Processing: #{user_id}"
 
     # Data already scraped
-    return if redis.hexists(key, user_id)
+    if redis.hexists(key, user_id)
+      logger.warn 'Already processed'
+      return
+    end
 
     begin
       scraper = Scraper.new
@@ -28,6 +32,7 @@ class Scrape
       scraper.close_session
     end
 
+    logger.info "Number of results: #{data.size}"
     redis.hset(key, user_id, MultiJson.dump(data))
   end
 end
