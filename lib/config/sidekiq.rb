@@ -12,6 +12,8 @@ module Config
 
     ::Sidekiq.configure_server do |config|
       config.redis = { url: redis_url }
+      config.error_handlers.clear
+      config.error_handlers << Proc.new { |e, _| ::Sidekiq.logger.error e.message }
     end
   end
 end
