@@ -22,6 +22,11 @@ Choice.options do
     valid Config::App::SUPPORTED_TYPES
   end
 
+  option :timeout do
+    long '--timeout=SECONDS'
+    desc "job should be interrupted if it runs too long (default: #{Config::App::JOB_TIMEOUT} seconds)"
+  end
+
   option :nolimit do
     long '--nolimit'
     desc 'scrape all data'
@@ -54,6 +59,7 @@ Sidekiq::DeadSet.new.clear
 
 # Schedule jobs
 limited = Choice[:nolimit].nil?
+timeout = Choice[:timeout] ? Choice[:timeout].to_i : nil
 user_ids.each do |user_id|
-  Scrape.perform_async(user_id.strip, type, limited)
+  Scrape.perform_async(user_id.strip, type, limited, timeout)
 end

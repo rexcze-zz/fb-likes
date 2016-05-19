@@ -1,6 +1,8 @@
 require 'sidekiq'
 require 'multi_json'
+require 'timeout'
 
+require_relative '../config/app'
 require_relative '../config/sidekiq'
 require_relative '../config/redis'
 require_relative '../scraper'
@@ -10,7 +12,7 @@ class Scrape
 
   sidekiq_options retry: 5, queue: :scraping, backtrace: false
 
-  def perform(user_id, type, limited)
+  def perform(user_id, type, limited, timeout)
     redis = Config::Redis.connection
     key = Config::Redis.method("key_#{type}").call
     logger.info "Processing: #{user_id}"
@@ -24,7 +26,12 @@ class Scrape
     begin
       scraper = Scraper.new
       scraper.login
-      data = scraper.method("get_#{type}").call(user_id, limited)
+
+      data = []
+      timeout ||= Config::App::JOB_TIMEOUT
+      Timeout::timeout(timeout) do
+        data = scraper.method("get_#{type}").call(user_id, limited)
+      end
     rescue Scraper::PageDoesNotExist => e
       logger.error e.message
       return

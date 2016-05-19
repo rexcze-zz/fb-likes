@@ -53,6 +53,10 @@ By default the number of scraped records on 1 page is limited. If you want to sc
 ```
 bin/scrape -i [input file] -t likes --nolimit
 ```
+Scraping data from page with lot of results can be very time consuming. If you want to interrupt the scraping job, you can define the period by using **--timeout** parameter. The default value is 600 seconds, so the scraping job will be interrupted if it runs longer than 10 minutes.
+```
+bin/scrape -i [input file] -t likes --timeout=3600
+```
 
 To get user ID you can use http://findmyfbid.com/
 

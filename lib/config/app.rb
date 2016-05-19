@@ -1,6 +1,7 @@
 module Config
   module App
     SUPPORTED_TYPES = %w(likes groups)
+    JOB_TIMEOUT = 600 # seconds
 
     class << self
       def supported_types
