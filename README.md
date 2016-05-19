@@ -12,6 +12,11 @@ bundle
 You need to have Redis installed and it should be running.
 http://redis.io/download
 
+Start redis-server using command (surprise surprise)
+```
+redis-server
+```
+
 ### Run Sidekiq
 ```
 bin/sidekiq
