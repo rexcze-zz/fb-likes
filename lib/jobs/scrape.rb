@@ -28,8 +28,7 @@ class Scrape
       scraper.login
 
       data = []
-      timeout ||= Config::App::JOB_TIMEOUT
-      Timeout::timeout(timeout) do
+      Timeout::timeout(real_timeout(timeout, limited)) do
         data = scraper.method("get_#{type}").call(user_id, limited)
       end
     rescue Scraper::PageDoesNotExist => e
@@ -41,5 +40,13 @@ class Scrape
 
     logger.info "Number of results: #{data.size}"
     redis.hset(key, user_id, MultiJson.dump(data))
+  end
+
+  private
+
+  def real_timeout(timeout, limited)
+    return timeout if timeout
+    return Config::App::JOB_TIMEOUT if limited
+    Config::App::NOLIMIT_JOB_TIMEOUT
   end
 end

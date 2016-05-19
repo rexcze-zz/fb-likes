@@ -49,11 +49,11 @@ The input file should contain list of user IDs with each user ID placed on separ
 ...
 ```
 
-By default the number of scraped records on 1 page is limited. If you want to scrape all data, use **--no-limit** parameter.
+By default the number of scraped records on 1 page is limited. If you want to scrape all data, use **--nolimit** parameter.
 ```
 bin/scrape -i [input file] -t likes --nolimit
 ```
-Scraping data from page with lot of results can be very time consuming. If you want to interrupt the scraping job, you can define the period by using **--timeout** parameter. The default value is 600 seconds, so the scraping job will be interrupted if it runs longer than 10 minutes.
+Scraping data from page with lot of results can be very time consuming. If you want to interrupt the scraping job, you can define the period by using **--timeout** parameter. The default value is 600 seconds, so the scraping job will be interrupted if it runs longer than 10 minutes. If **--nolimit** parameter is used then the default timeout is set to 150 minutes.
 ```
 bin/scrape -i [input file] -t likes --timeout=3600
 ```
